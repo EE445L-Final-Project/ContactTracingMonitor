@@ -116,13 +116,14 @@ class DeviceViewController: UIViewController,CBCentralManagerDelegate, CBPeriphe
             peripheral.readValue(for: userNameCharacteristic)
         case userNameUUID:
             guard let raw = characteristic.value else { return }
+            let nameCount = raw.count - 5
             var name = [UInt8]()
-            for index in 0...6 {
+            for index in 0..<nameCount {
                 name.append(raw[index])
             }
             let username = String(decoding: name, as: UTF8.self)
-            let date = Int(raw[7]) * 10000 + Int(raw[8]) * 100 + Int(raw[9])
-            let time = Int(raw[10]) * 100 + Int(raw[11])
+            let date = Int(raw[nameCount]) * 10000 + Int(raw[nameCount + 1]) * 100 + Int(raw[nameCount + 2])
+            let time = Int(raw[nameCount + 3]) * 100 + Int(raw[nameCount + 4])
             let user = UserProfile(userName: username, date: date, time: time)
             userList.append(user)
             userTableView.reloadData()
