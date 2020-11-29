@@ -30,7 +30,7 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
     
     var bluetoothCentral: CBCentralManager!
     var connectedPeripheral: CBPeripheral!
-    
+    var connectedDeviceName: String!
     
 
     var deviceName = [String]()
@@ -62,6 +62,9 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
             }
         }else{
             bluetoothCentral.stopScan()
+            deviceName.removeAll()
+            deviceList.removeAll()
+            deviceTableView.reloadData()
         }
     }
     
@@ -78,6 +81,7 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
         }
         bluetoothCentral.connect(deviceList[row])
         connectedPeripheral = deviceList[row]
+        connectedDeviceName = deviceName[row]
     }
     
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
@@ -89,6 +93,7 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
             if let nextViewController = segue.destination as? DeviceViewController {
                 nextViewController.bluetoothCentral = bluetoothCentral
                 nextViewController.peripheral = connectedPeripheral
+                nextViewController.deviceName = connectedDeviceName
             }
         }
     }

@@ -32,10 +32,14 @@ class DeviceViewController: UIViewController,CBCentralManagerDelegate, CBPeriphe
     
     let deviceNameUUID = CBUUID(string: "97FF")
     let userNameUUID = CBUUID(string: "1001")
-    let dateUUID = CBUUID(string: "1002")
-    let timeUUID = CBUUID(string: "1003")
     let readyUUID = CBUUID(string: "1004")
     let ackUUID = CBUUID(string: "1005")
+    
+    let dateUUID = CBUUID(string: "0B97")
+    let timeUUID = CBUUID(string: "ADC1")
+    
+    var deviceName: String!
+    
     
     var deviceNameCharacteristic: CBCharacteristic!
     var userNameCharacteristic: CBCharacteristic!
@@ -52,6 +56,8 @@ class DeviceViewController: UIViewController,CBCentralManagerDelegate, CBPeriphe
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        self.hideKeyboardWhenTappedAround()
+        
         peripheral.delegate = self
         bluetoothCentral.delegate = self
         userTableView.delegate = self
@@ -59,7 +65,7 @@ class DeviceViewController: UIViewController,CBCentralManagerDelegate, CBPeriphe
         
         if peripheral.state == .connected{
             peripheral.discoverServices(nil)
-            deviceNameField.text = peripheral.name
+            deviceNameField.text = deviceName
         }
         // Do any additional setup after loading the view.
     }
@@ -131,8 +137,8 @@ class DeviceViewController: UIViewController,CBCentralManagerDelegate, CBPeriphe
     @IBAction func changeDeviceName(_ sender: UIButton) {
         let newName = deviceNameField.text;
         guard let data = newName?.data(using: .utf8) else {return}
+        deviceNameField.endEditing(true)
         peripheral.writeValue(data, for: deviceNameCharacteristic, type: .withResponse)
-        
     }
     
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
@@ -172,6 +178,16 @@ class DeviceViewController: UIViewController,CBCentralManagerDelegate, CBPeriphe
         }
         
     }
-    
+}
 
+extension DeviceViewController{
+    func hideKeyboardWhenTappedAround() {
+        let tapGesture = UITapGestureRecognizer(target: self,
+                         action: #selector(hideKeyboard))
+        view.addGestureRecognizer(tapGesture)
+    }
+    
+    @objc func hideKeyboard() {
+        deviceNameField.endEditing(true)
+    }
 }
