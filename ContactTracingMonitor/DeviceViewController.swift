@@ -44,6 +44,8 @@ class DeviceViewController: UIViewController,CBCentralManagerDelegate, CBPeriphe
     var deviceNameCharacteristic: CBCharacteristic!
     var userNameCharacteristic: CBCharacteristic!
     var readyCharacteristic: CBCharacteristic!
+    var dateCharacteristic: CBCharacteristic!
+    var timeCharacteristic: CBCharacteristic!
 
     @IBOutlet weak var deviceNameField: UITextField!
     @IBOutlet weak var userTableView: UITableView!
@@ -92,6 +94,10 @@ class DeviceViewController: UIViewController,CBCentralManagerDelegate, CBPeriphe
                 deviceNameCharacteristic = characteristic
             case userNameUUID:
                 userNameCharacteristic = characteristic
+            case dateUUID:
+                dateCharacteristic = characteristic
+            case timeUUID:
+                timeCharacteristic = characteristic
             default:
                 print("Unhandled Characteristic UUID: \(characteristic.uuid)")
             }
@@ -140,6 +146,27 @@ class DeviceViewController: UIViewController,CBCentralManagerDelegate, CBPeriphe
         deviceNameField.endEditing(true)
         peripheral.writeValue(data, for: deviceNameCharacteristic, type: .withResponse)
     }
+    
+    @IBAction func syncTime(_ sender: UIButton) {
+        let date = Date()
+        let calendar = Calendar.current
+        let day = calendar.component(.day, from: date)
+        let month = calendar.component(.month, from: date)
+        let year = calendar.component(.year, from: date) % 100
+        var dateData = [UInt8]()
+        dateData.append(UInt8(month))
+        dateData.append(UInt8(day))
+        dateData.append(UInt8(year))
+        peripheral.writeValue(Data(dateData), for: dateCharacteristic, type: .withResponse)
+        
+        let minute = calendar.component(.minute, from: date)
+        let hour = calendar.component(.hour, from: date)
+        var timeData = [UInt8]()
+        timeData.append(UInt8(minute))
+        timeData.append(UInt8(hour))
+        peripheral.writeValue(Data(timeData), for: timeCharacteristic, type: .withResponse)
+    }
+    
     
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
         performSegue(withIdentifier: "toHome", sender: self)
